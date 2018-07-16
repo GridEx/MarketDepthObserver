@@ -158,17 +158,29 @@ namespace GridEx.MarketDepthObserver.Classes
 					case MarketChangeTypeCode.BidByExecutedOrder:
 						marketChangeType = "BE";
 						break;
-					case MarketChangeTypeCode.VolumeByAddedOrder:
-						marketChangeType = "VA";
+					case MarketChangeTypeCode.BuyVolumeByAddedOrder:
+						marketChangeType = "VABuy";
 						break;
-					case MarketChangeTypeCode.VolumeByCancelledOrder:
-						marketChangeType = "VC";
+					case MarketChangeTypeCode.BuyVolumeByCancelledOrder:
+						marketChangeType = "VCB";
 						break;
-					case MarketChangeTypeCode.VolumeByExecutedOrder:
-						marketChangeType = "VE";
+					case MarketChangeTypeCode.BidVolumeByExecutedOrder:
+						marketChangeType = "VEB";
 						break;
-					case MarketChangeTypeCode.InfoAboutVolumeAdded:
-						marketChangeType = "IV";
+					case MarketChangeTypeCode.BuyVolumeInfoAdded:
+						marketChangeType = "IVB";
+						break;
+					case MarketChangeTypeCode.SellVolumeByAddedOrder:
+						marketChangeType = "VAS";
+						break;
+					case MarketChangeTypeCode.SellVolumeByCancelledOrder:
+						marketChangeType = "VCS";
+						break;
+					case MarketChangeTypeCode.AskVolumeByExecutedOrder:
+						marketChangeType = "VEA";
+						break;
+					case MarketChangeTypeCode.SellVolumeInfoAdded:
+						marketChangeType = "IVS";
 						break;
 				}
 				AddMessageToFileLog?.Invoke($"{DateTime.Now.ToString("mm:ss.fff")} P={marketChange.Price.ToString("F11")} V={marketChange.Volume.ToString("F11")} {marketChangeType}{Environment.NewLine}");

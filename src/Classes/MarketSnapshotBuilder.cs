@@ -37,7 +37,6 @@ namespace GridEx.MarketDepthObserver.Classes
 							_buys.Remove(volume);
 							_buys.Add(volume);
 						}
-						_bid = change.Price;
 						break;                                           
 					case MarketChangeTypeCode.AskByAddedOrder:
 					case MarketChangeTypeCode.AskByExecutedOrder:
@@ -48,44 +47,15 @@ namespace GridEx.MarketDepthObserver.Classes
 							_sells.Remove(volume);
 							_sells.Add(volume);
 						}
-						_ask = change.Price;
 						break;
-					case MarketChangeTypeCode.VolumeByAddedOrder:
-					case MarketChangeTypeCode.VolumeByExecutedOrder:
-					case MarketChangeTypeCode.VolumeByCancelledOrder:
+					case MarketChangeTypeCode.BuyVolumeByAddedOrder:
+					case MarketChangeTypeCode.BidVolumeByExecutedOrder:
+					case MarketChangeTypeCode.BuyVolumeByCancelledOrder:
 						if (change.Volume == 0)
 						{
-							if (IsBuy(change))
-							{
-								_buys.Remove(volume);
-							}
-							else
-							{
-								_sells.Remove(volume);
-							}
+							_buys.Remove(volume);
 						}
 						else
-						{
-							if (IsBuy(change))
-							{
-								if (!_buys.Add(volume))
-								{
-									_buys.Remove(volume);
-									_buys.Add(volume);
-								}
-							}
-							else
-							{
-								if (!_buys.Add(volume))
-								{
-									_sells.Remove(volume);
-									_sells.Add(volume);
-								}
-							}
-						}
-						break;
-					case MarketChangeTypeCode.InfoAboutVolumeAdded:
-						if (IsBuy(change))
 						{
 							if (!_buys.Add(volume))
 							{
@@ -93,30 +63,40 @@ namespace GridEx.MarketDepthObserver.Classes
 								_buys.Add(volume);
 							}
 						}
+						break;
+					case MarketChangeTypeCode.SellVolumeByAddedOrder:
+					case MarketChangeTypeCode.AskVolumeByExecutedOrder:
+					case MarketChangeTypeCode.SellVolumeByCancelledOrder:
+						if (change.Volume == 0)
+						{
+							_sells.Remove(volume);
+						}
 						else
 						{
-							if (!_buys.Add(volume))
+							if (!_sells.Add(volume))
 							{
 								_sells.Remove(volume);
 								_sells.Add(volume);
 							}
 						}
 						break;
+					case MarketChangeTypeCode.BuyVolumeInfoAdded:
+						if (!_buys.Add(volume))
+						{
+							_buys.Remove(volume);
+							_buys.Add(volume);
+						}
+						break;
+					case MarketChangeTypeCode.SellVolumeInfoAdded:
+						if (!_sells.Add(volume))
+						{
+							_sells.Remove(volume);
+							_sells.Add(volume);
+						}
+						break;
 					default:
 						throw new NotSupportedException($"Not supported type: '{change.MarketChangeType}'.");
 				}
-
-				#region Reset _bid and _ask
-				if (_buys.Count == 0)
-				{
-					_bid = double.MinValue;
-				}
-
-				if (_sells.Count == 0)
-				{
-					_ask = double.MaxValue;
-				}
-				#endregion
 			}
 		}
 
@@ -125,8 +105,6 @@ namespace GridEx.MarketDepthObserver.Classes
 		{
 			lock (snapshotLocker)
 			{
-				_bid = double.MinValue;
-				_ask = double.MaxValue;
 				_buys.Clear();
 				_sells.Clear();
 
@@ -137,7 +115,6 @@ namespace GridEx.MarketDepthObserver.Classes
 					if (price > 0 && volume > 0)
 					{
 						_buys.Add(new PriceVolumePair(price, volume));
-						_bid = price;
 					}
 
 					price = ref marketSnapshot.SellPrices[i];
@@ -145,7 +122,6 @@ namespace GridEx.MarketDepthObserver.Classes
 					if (price > 0 && volume > 0)
 					{
 						_sells.Add(new PriceVolumePair(price, volume));
-						_ask = price;
 					}
 				}
 			}
@@ -161,23 +137,6 @@ namespace GridEx.MarketDepthObserver.Classes
 				buysArray = _buys.Take(Math.Min(_buys.Count, MarketSnapshot.Depth)).ToArray();
 				sellsArray = _sells.Take(Math.Min(_sells.Count, MarketSnapshot.Depth)).ToArray();
 			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private bool IsBuy(in MarketChange change)
-		{
-#if DEBUG
-			if (_bid == EmptyBid && _ask == EmptyAsk)
-			{
-				throw new InvalidOperationException("_bid == Price.EmptyBid && _ask == Price.EmptyAsk");
-			}
-#endif
-			if (_bid == double.MinValue)
-			{
-				return _ask > change.Price;
-			}
-
-			return _bid >= change.Price;
 		}
 
 		private sealed class ReverseComparer : IComparer<double>
@@ -236,12 +195,8 @@ namespace GridEx.MarketDepthObserver.Classes
 
 		private readonly SortedSet<PriceVolumePair> _sells = new SortedSet<PriceVolumePair>(new PriceVolumePairComparer());
 		private readonly SortedSet<PriceVolumePair> _buys = new SortedSet<PriceVolumePair>(new PriceVolumePairComparerReverse());
-		private double _bid = double.MinValue;
-		private double _ask = double.MaxValue;
 		private MarketSnapshot _marketSnapshot;
 		private object snapshotLocker = new object();
-		private const double EmptyBid = double.MinValue;
-		private const double EmptyAsk = double.MaxValue;
 	}
 
 	public class PriceVolumePair
