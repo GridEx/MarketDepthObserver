@@ -1,0 +1,186 @@
+﻿<Window x:Class="GridEx.MarketDepthObserver.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:Converters="clr-namespace:GridEx.MarketDepthObserver.Converters"
+		mc:Ignorable="d"
+		FontSize="14"
+        Title="Market Depth Client"
+		SizeToContent="Width"
+		MinHeight="450" MinWidth="800" Height="800" MaxHeight="1000"
+		Closed="Window_Closed">
+	<Window.Resources>
+		<Converters:PriceConverter x:Key="priceConverter" />
+		<Converters:EnumBooleanConverter x:Key="enumBooleanConverter" />
+	</Window.Resources>
+	<DockPanel LastChildFill="True">
+		<ToolBar DockPanel.Dock="Top">
+			<Menu>
+				<MenuItem Header="IP config" ToolTip="Press to change server IP" Click="MenuItem_Click"/>
+				<MenuItem Name="ConnectToMarketButton" 
+						  Header="Disconnected from market (press to connect)" ToolTip="Press to connect to Market Depth Server"
+						  IsCheckable="True" IsChecked="false"
+						  Checked="ConnectToMarketButton_Checked"
+						  Unchecked="ConnectToMarketButton_Unchecked"
+						  />
+			</Menu>
+
+			<CheckBox Name="logCheckBox" 
+					  IsChecked="{Binding LogToFile, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}}"
+					  Margin="10,0,10,0"
+					  Content="Log to file" />
+
+			<WrapPanel VerticalAlignment="Center">
+				<WrapPanel.Resources>
+					<Style TargetType="RadioButton">
+						<Setter Property="Margin" Value="5,0,0,0" />
+						<Setter Property="VerticalContentAlignment"  Value="Center" />
+						<Setter Property="HorizontalContentAlignment"  Value="Left" />
+					</Style>
+				</WrapPanel.Resources>
+				<TextBlock>Freq. upd.:</TextBlock>
+				<RadioButton IsChecked="{Binding Path=Frequency, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Hz1}">1Hz</RadioButton>
+				<RadioButton IsChecked="{Binding Path=Frequency, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Hz2}">2Hz</RadioButton>
+				<RadioButton IsChecked="{Binding Path=Frequency, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Hz4}">4Hz</RadioButton>
+				<RadioButton IsChecked="{Binding Path=Frequency, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Hz5}">5Hz</RadioButton>
+				<RadioButton IsChecked="{Binding Path=Frequency, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Hz10}">10Hz</RadioButton>
+				<RadioButton IsChecked="{Binding Path=Frequency, Mode=TwoWay, RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Converter={StaticResource enumBooleanConverter}, ConverterParameter=Hz20}">20Hz</RadioButton>
+				<TextBlock Margin="20,0,0,0" Name="eventsTextBlock">Events:</TextBlock>
+			</WrapPanel>
+		</ToolBar>
+		<Expander Name="logHistoruContainer" Header="Log" DockPanel.Dock="Bottom" Margin="5" IsExpanded="False">
+			<TextBox Name="log" Height="150" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" VerticalScrollBarVisibility="Visible" />
+		</Expander>
+		<ScrollViewer Name="scrollOfTables">
+			<Grid ShowGridLines="True">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition />
+					<ColumnDefinition />
+				</Grid.ColumnDefinitions>
+
+				<ListView Name="bidListView" HorizontalAlignment="Right" VerticalAlignment="Stretch" SelectionMode="Single"
+					  ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+					  BorderThickness="0">
+					<ListView.Resources>
+						<Style TargetType="ListViewItem">
+							<Setter Property="Background">
+								<Setter.Value>
+									<DrawingBrush AlignmentX="Right">
+										<DrawingBrush.RelativeTransform>
+											<ScaleTransform CenterX="1" ScaleX="{Binding PercentOfTotalSum, Mode=OneWay}" />
+										</DrawingBrush.RelativeTransform>
+										<DrawingBrush.Drawing>
+											<GeometryDrawing>
+												<GeometryDrawing.Pen>
+													<Pen>
+														<Pen.Brush>
+															<SolidColorBrush Color="Green" Opacity="0.4" />
+														</Pen.Brush>
+													</Pen>
+												</GeometryDrawing.Pen>
+												<GeometryDrawing.Geometry>
+													<RectangleGeometry Rect="0,0,1,1">
+													</RectangleGeometry>
+												</GeometryDrawing.Geometry>
+											</GeometryDrawing>
+										</DrawingBrush.Drawing>
+									</DrawingBrush>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</ListView.Resources>
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Width="150" Header="Sum">
+								<GridViewColumn.CellTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding CurrentSum, Mode=OneWay, Converter={StaticResource priceConverter}}"
+											   ToolTip="{Binding CurrentSum, Mode=OneWay}" />
+									</DataTemplate>
+								</GridViewColumn.CellTemplate>
+							</GridViewColumn>
+							<GridViewColumn Width="150" Header="Amount">
+								<GridViewColumn.CellTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Value, Mode=OneWay, Converter={StaticResource priceConverter}}"
+											   ToolTip="{Binding Value, Mode=OneWay}" />
+									</DataTemplate>
+								</GridViewColumn.CellTemplate>
+							</GridViewColumn>
+							<GridViewColumn Width="150" Header="Bid">
+								<GridViewColumn.CellTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Price, Mode=OneWay, Converter={StaticResource priceConverter}}"
+											   ToolTip="{Binding Price, Mode=OneWay}" />
+									</DataTemplate>
+								</GridViewColumn.CellTemplate>
+							</GridViewColumn>
+						</GridView>
+					</ListView.View>
+				</ListView>
+				<ListView Name="askListView" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top"
+					  ScrollViewer.VerticalScrollBarVisibility="Hidden"
+					  ScrollViewer.HorizontalScrollBarVisibility="Hidden" Grid.ColumnSpan="2"
+					  BorderThickness="0">
+					<ListView.Resources>
+						<Style TargetType="ListViewItem">
+							<Setter Property="Background">
+								<Setter.Value>
+									<DrawingBrush AlignmentX="Right">
+										<DrawingBrush.RelativeTransform>
+											<ScaleTransform ScaleX="{Binding PercentOfTotalSum, Mode=OneWay}" />
+										</DrawingBrush.RelativeTransform>
+										<DrawingBrush.Drawing>
+											<GeometryDrawing>
+												<GeometryDrawing.Pen>
+													<Pen>
+														<Pen.Brush>
+															<SolidColorBrush Color="Pink" Opacity="0.6" />
+														</Pen.Brush>
+													</Pen>
+												</GeometryDrawing.Pen>
+												<GeometryDrawing.Geometry>
+													<RectangleGeometry Rect="0,0,1,1">
+													</RectangleGeometry>
+												</GeometryDrawing.Geometry>
+											</GeometryDrawing>
+										</DrawingBrush.Drawing>
+									</DrawingBrush>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</ListView.Resources>
+					<ListView.View>
+						<GridView>
+							<GridViewColumn Width="150" Header="Ask">
+								<GridViewColumn.CellTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Price, Mode=OneWay, Converter={StaticResource priceConverter}}"
+											   ToolTip="{Binding Price, Mode=OneWay}" />
+									</DataTemplate>
+								</GridViewColumn.CellTemplate>
+							</GridViewColumn>
+							<GridViewColumn Width="150" Header="Amount">
+								<GridViewColumn.CellTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Value, Mode=OneWay, Converter={StaticResource priceConverter}}"
+											   ToolTip="{Binding Value, Mode=OneWay}" />
+									</DataTemplate>
+								</GridViewColumn.CellTemplate>
+							</GridViewColumn>
+							<GridViewColumn Width="150" Header="Sum">
+								<GridViewColumn.CellTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding CurrentSum, Mode=OneWay, Converter={StaticResource priceConverter}}"
+											   ToolTip="{Binding CurrentSum, Mode=OneWay}" />
+									</DataTemplate>
+								</GridViewColumn.CellTemplate>
+							</GridViewColumn>
+						</GridView>
+					</ListView.View>
+				</ListView>
+			</Grid>
+		</ScrollViewer>
+	</DockPanel>
+</Window>

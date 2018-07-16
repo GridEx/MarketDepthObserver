@@ -1,0 +1,68 @@
+﻿<Window x:Class="GridEx.MarketDepthObserver.Config.IPWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GridEx.MarketDepthObserver.Config"
+		WindowStartupLocation="CenterOwner"
+        WindowStyle="ToolWindow"
+        SizeToContent="WidthAndHeight"
+        FontSize="14"
+        mc:Ignorable="d"
+        Title="Server IP">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Width" Value="100" />
+            <Setter Property="HorizontalAlignment"  Value="Right" />
+        </Style>
+        <Style TargetType="TextBox" x:Key="TextBoxStyle">
+            <Setter Property="HorizontalContentAlignment"  Value="Center"/>
+        </Style>
+        <Style TargetType="TextBox" x:Key="IPTextBoxStyle" BasedOn="{StaticResource TextBoxStyle}">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="Foreground" Value="Red"/>
+                    <Setter Property="ToolTip" 
+                         Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <local:IPConverter x:Key="IPConverterObject" />
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="10"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <GroupBox Header="IP">
+            <TextBox Width="150" Style="{StaticResource IPTextBoxStyle}">
+                <TextBox.Text>
+                    <Binding Path="IP" Mode="TwoWay" FallbackValue="127.0.0.1" RelativeSource="{RelativeSource AncestorType=Window, Mode=FindAncestor}" Converter="{StaticResource IPConverterObject}">
+                        <Binding.ValidationRules>
+                            <local:IpValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+        </GroupBox>
+        <GroupBox Header="Port" Grid.Column="2">
+            <TextBox Style="{StaticResource TextBoxStyle}">
+                <TextBox.Text>
+                    <Binding Path="Port" Mode="TwoWay"  FallbackValue="0000" RelativeSource="{RelativeSource AncestorType=Window, Mode=FindAncestor}">
+                        <Binding.ValidationRules>
+                            <local:PortValidationRule />
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+        </GroupBox>
+        <Button IsDefault="True" Grid.Row="2" Click="OkButton_Click">Ok</Button>
+        <Button IsCancel="True" Grid.Column="2" Grid.Row="2" Click="CancelButton_Click">Cancel</Button>
+    </Grid>
+</Window>
