@@ -1,0 +1,5 @@
+.vs
+bin
+obj
+MarketDepthObserver.csproj.user
+/src/Classes/MarketSnapshotBuilder1.cs
