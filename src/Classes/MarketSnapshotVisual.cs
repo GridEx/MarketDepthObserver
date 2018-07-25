@@ -1,48 +1,49 @@
 ﻿using System.Runtime.CompilerServices;
+using GridEx.API.MarketStream;
 
 namespace GridEx.MarketDepthObserver.Classes
 {
-	class MarketSnapshotVisual
+	public static class MarketSnapshotVisual
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public unsafe MarketSnapshotVisual(ref PriceVolumePair[] buyArray, ref PriceVolumePair[] sellArray)
+		public static void FillVisualPrices(
+			PriceVolumePair[] buyArray, 
+			int buyAmount, 
+			PriceVolumePair[] sellArray, 
+			int sellAmount,
+			MarketValueVisual[] asks,
+			MarketValueVisual[] bids)
 		{
 			var MaxVolumeAsk = 0d;
 			var MaxVolumeBid = 0d;
 
-			MarketValueVisualsAsk = new MarketValueVisual[sellArray.Length];
-			MarketValueVisualsBid = new MarketValueVisual[buyArray.Length];
-
-			for (int i = 0; i < sellArray.Length; i++)
+			for (int i = 0; i < sellAmount; i++)
 			{
-				MarketValueVisualsAsk[i] = new MarketValueVisual(sellArray[i]);
+				asks[i] = new MarketValueVisual(sellArray[i]);
 				MaxVolumeAsk += sellArray[i].Volume;
 			}
-			for (int i = 0; i < buyArray.Length; i++)
+			for (int i = 0; i < buyAmount; i++)
 			{
-				MarketValueVisualsBid[i] = new MarketValueVisual(buyArray[i]);
+				bids[i] = new MarketValueVisual(buyArray[i]);
 				MaxVolumeBid += buyArray[i].Volume;
 			}
 
-			for (int i = 0; i < MarketValueVisualsAsk.Length; i++)
+			for (int i = 0; i < sellAmount; i++)
 			{
-				MarketValueVisualsAsk[i].CalculatePercentOfTotalSum(
+				asks[i].CalculatePercentOfTotalSum(
 					i == 0
 					? 0
-					: MarketValueVisualsAsk[i - 1].CurrentSum,
+					: asks[i - 1].CurrentSum,
 					MaxVolumeAsk);
 			}
-			for (int i = 0; i < MarketValueVisualsBid.Length; i++)
+			for (int i = 0; i < buyAmount; i++)
 			{
-				MarketValueVisualsBid[i].CalculatePercentOfTotalSum(
+				bids[i].CalculatePercentOfTotalSum(
 					i == 0
 					? 0
-					: MarketValueVisualsBid[i - 1].CurrentSum,
+					: bids[i - 1].CurrentSum,
 					MaxVolumeBid);
 			}
 		}
-
-		public readonly MarketValueVisual[] MarketValueVisualsAsk;
-		public readonly MarketValueVisual[] MarketValueVisualsBid;
 	}
 }

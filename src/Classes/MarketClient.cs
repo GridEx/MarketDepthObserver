@@ -76,9 +76,9 @@ namespace GridEx.MarketDepthObserver.Classes
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void GetSnapshot(out PriceVolumePair[] buyArray, out PriceVolumePair[] sellArray)
+		public void GetSnapshot(PriceVolumePair[] buyArray, out int buyAmount, PriceVolumePair[] sellArray, out int sellAmount)
 		{
-			_marketSnapshotBuilder.CreateSnapshot(out buyArray, out sellArray);
+			_marketSnapshotBuilder.CreateSnapshot(buyArray, out buyAmount, sellArray, out sellAmount);
 		}
 
 		public void Disconnect(bool waitLittlePause = false)

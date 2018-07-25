@@ -11,21 +11,16 @@ namespace GridEx.MarketDepthObserver.Classes
 	{
 		public MarketSnapshotBuilder()
 		{
-			_marketSnapshot = new MarketSnapshot(DateTimeOffset.UtcNow.Ticks);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Build(ref MarketChange change)
 		{
 			Debug.Assert(change.Price != 0, $"Price={change.Price} Volume={change.Volume} Type={change.MarketChangeType.ToString()}");
+			var volume = new PriceVolumePair(change.Price, change.Volume);
 
-			if (change.Price == 0)
-				return;
-
-			lock (snapshotLocker)
+			lock (_syncRoot)
 			{
-				var volume = new PriceVolumePair(change.Price, change.Volume);
-
 				switch (change.MarketChangeType)
 				{
 					case MarketChangeTypeCode.BidByAddedOrder:
@@ -103,57 +98,46 @@ namespace GridEx.MarketDepthObserver.Classes
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public unsafe void ReBuild(ref MarketSnapshot marketSnapshot)
 		{
-			lock (snapshotLocker)
+			lock (_syncRoot)
 			{
 				_buys.Clear();
 				_sells.Clear();
 
 				for (int i = 0; i < MarketSnapshot.Depth; i++)
 				{
-					ref var price = ref marketSnapshot.BuyPrices[i];
-					ref var volume = ref marketSnapshot.BuyVolumes[i];
-					if (price > 0 && volume > 0)
+					var buyPrice = marketSnapshot.BuyPrices[i];
+					var buyVolume = marketSnapshot.BuyVolumes[i];
+					if (buyPrice > 0 && buyVolume > 0)
 					{
-						_buys.Add(new PriceVolumePair(price, volume));
+						_buys.Add(new PriceVolumePair(buyPrice, buyVolume));
 					}
 
-					price = ref marketSnapshot.SellPrices[i];
-					volume = ref marketSnapshot.SellVolumes[i];
-					if (price > 0 && volume > 0)
+					var sellPrice = marketSnapshot.SellPrices[i];
+					var sellvolume = marketSnapshot.SellVolumes[i];
+					if (sellPrice > 0 && sellvolume > 0)
 					{
-						_sells.Add(new PriceVolumePair(price, volume));
+						_sells.Add(new PriceVolumePair(sellPrice, sellvolume));
 					}
 				}
 			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void CreateSnapshot(out PriceVolumePair[] buysArray, out PriceVolumePair[] sellsArray)
+		public void CreateSnapshot(PriceVolumePair[] buysArray, out int buyAmount, PriceVolumePair[] sellsArray, out int sellAmount)
 		{
-			buysArray = new PriceVolumePair[0];
-			sellsArray = new PriceVolumePair[0];
-			lock (snapshotLocker)
+			lock (_syncRoot)
 			{
-				buysArray = _buys.Take(Math.Min(_buys.Count, MarketSnapshot.Depth)).ToArray();
-				sellsArray = _sells.Take(Math.Min(_sells.Count, MarketSnapshot.Depth)).ToArray();
-			}
-		}
-
-		private sealed class ReverseComparer : IComparer<double>
-		{
-			public int Compare(double x, double y)
-			{
-				if (x > y)
+				buyAmount = 0;
+				foreach (var buy in _buys.Take(Math.Min(_buys.Count, MarketSnapshot.Depth)))
 				{
-					return -1;
+					buysArray[buyAmount++] = buy;
 				}
 
-				if (x < y)
+				sellAmount = 0;
+				foreach (var sell in _sells.Take(Math.Min(_sells.Count, MarketSnapshot.Depth)))
 				{
-					return 1;
+					sellsArray[sellAmount++] = sell;
 				}
-
-				return 0;
 			}
 		}
 
@@ -195,11 +179,10 @@ namespace GridEx.MarketDepthObserver.Classes
 
 		private readonly SortedSet<PriceVolumePair> _sells = new SortedSet<PriceVolumePair>(new PriceVolumePairComparer());
 		private readonly SortedSet<PriceVolumePair> _buys = new SortedSet<PriceVolumePair>(new PriceVolumePairComparerReverse());
-		private MarketSnapshot _marketSnapshot;
-		private object snapshotLocker = new object();
+		private readonly object _syncRoot = new object();
 	}
 
-	public class PriceVolumePair
+	public readonly struct PriceVolumePair
 	{
 		public PriceVolumePair(double price, double volume)
 		{
@@ -208,6 +191,6 @@ namespace GridEx.MarketDepthObserver.Classes
 		}
 
 		public readonly double Price;
-		public double Volume;
+		public readonly double Volume;
 	}
 }
