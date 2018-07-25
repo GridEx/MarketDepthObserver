@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+using GridEx.API.MarketStream;
 using GridEx.MarketDepthObserver.Classes;
 using GridEx.MarketDepthObserver.Config;
 using MarketDepthClient.Classes;
@@ -237,23 +238,40 @@ namespace GridEx.MarketDepthObserver
 				pauseEvent.Reset();
 				int elapsedMiliseconds = 0;
 				MarketClient client = null;
+				var buyArray = new PriceVolumePair[MarketSnapshot.Depth];
+				var sellArray = new PriceVolumePair[MarketSnapshot.Depth];
+
+				var asks = new MarketValueVisual[MarketSnapshot.Depth];
+				var bids = new MarketValueVisual[MarketSnapshot.Depth];
+
 				while (!_stop)
 				{
 					client = marketClient;
 					if (client != null && client.IsConnected)
 					{
+						client.GetSnapshot(
+							buyArray, 
+							out int buyAmount, 
+							sellArray,
+							out int sellAmount);
+
+						MarketSnapshotVisual.FillVisualPrices(
+							buyArray, 
+							buyAmount, 
+							sellArray, 
+							sellAmount,
+							asks,
+							bids);
+
 						Dispatcher.BeginInvoke(new Action(() =>
 						{
-							client.GetSnapshot(out PriceVolumePair[] buyArray, out PriceVolumePair[] sellArray);
-							var snapshot = new MarketSnapshotVisual(ref buyArray, ref sellArray);
-
-							bidListView.ItemsSource = snapshot.MarketValueVisualsBid.ToArray();
-							askListView.ItemsSource = snapshot.MarketValueVisualsAsk.ToArray();
+							bidListView.ItemsSource = bids.Take(buyAmount);
+							askListView.ItemsSource = asks.Take(sellAmount);
 
 #if DEBUG
-							if (snapshot.MarketValueVisualsBid.Any() && snapshot.MarketValueVisualsAsk.Any())
+							if (buyAmount > 0 && sellAmount > 0)
 							{
-								Debug.Assert(snapshot.MarketValueVisualsBid.Max(e => e.Price) <= snapshot.MarketValueVisualsAsk.Min(e => e.Price));
+								Debug.Assert(bids.Max(e => e.Price) <= asks.Min(e => e.Price));
 							}
 #endif
 

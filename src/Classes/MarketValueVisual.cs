@@ -1,17 +1,21 @@
 ﻿namespace GridEx.MarketDepthObserver.Classes
 {
-	class MarketValueVisual
+	public struct MarketValueVisual
 	{
 		public MarketValueVisual(PriceVolumePair value)
 		{
 			Price = value.Price;
 			Value = value.Volume;
+			CurrentSum = 0;
+			PercentOfTotalSum = 0;
 		}
 
 		public MarketValueVisual(double price, double value)
 		{
 			Price = price;
 			Value = value;
+			CurrentSum = 0;
+			PercentOfTotalSum = 0;
 		}
 
 		public void CalculatePercentOfTotalSum(double prevoiusSum, double maxValue)
