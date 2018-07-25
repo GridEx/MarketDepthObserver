@@ -34,7 +34,6 @@ namespace GridEx.MarketDepthObserver.Classes
 		{
 			_enviromentExitWait = enviromentExitWait;
 			_cancellationTokenSource = cancellationTokenSource;
-			//Disconnect();
 			_marketSnapshotBuilder = new MarketSnapshotBuilder();
 
 			_marketStreamSocket = new MarketStreamSocket();

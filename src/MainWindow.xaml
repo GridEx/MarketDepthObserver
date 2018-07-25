@@ -6,7 +6,7 @@
 		xmlns:Converters="clr-namespace:GridEx.MarketDepthObserver.Converters"
 		mc:Ignorable="d"
 		FontSize="14"
-        Title="Market Depth Client"
+        Title="Market Depth Observer"
 		SizeToContent="Width"
 		MinHeight="450" MinWidth="800" Height="800" MaxHeight="1000"
 		Closed="Window_Closed">
