@@ -206,7 +206,7 @@ namespace GridEx.MarketDepthObserver
 			var pauseEvent = new ManualResetEventSlim();
 			pauseEvent.Wait(5000);
 
-			if (marketClient != null && !marketClient.IsConnected)
+			if (marketClient == null || !marketClient.IsConnected)
 			{
 				Dispatcher.Invoke(new Action(() =>
 				{

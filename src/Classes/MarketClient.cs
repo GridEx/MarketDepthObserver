@@ -65,7 +65,7 @@ namespace GridEx.MarketDepthObserver.Classes
 				}
 			}
 
-			Thread.Sleep(5000);
+			Thread.Sleep(1000);
 
 			Task.Factory.StartNew(
 				() => RunSocket(),
