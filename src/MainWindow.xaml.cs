@@ -271,7 +271,7 @@ namespace GridEx.MarketDepthObserver
 #if DEBUG
 							if (buyAmount > 0 && sellAmount > 0)
 							{
-								Debug.Assert(bids.Max(e => e.Price) <= asks.Min(e => e.Price));
+								Debug.Assert(bids.Take(buyAmount).Max(e => e.Price) <= asks.Take(sellAmount).Min(e => e.Price));
 							}
 #endif
 
