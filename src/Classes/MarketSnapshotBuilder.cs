@@ -17,6 +17,11 @@ namespace GridEx.MarketDepthObserver.Classes
 		public void Build(ref MarketChange change)
 		{
 			Debug.Assert(change.Price != 0, $"Price={change.Price} Volume={change.Volume} Type={change.MarketChangeType.ToString()}");
+			if (change.Price == 0)
+			{
+				return;
+			}
+
 			var volume = new PriceVolumePair(change.Price, change.Volume);
 
 			lock (_syncRoot)
