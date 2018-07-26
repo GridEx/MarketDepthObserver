@@ -52,10 +52,6 @@ namespace GridEx.MarketDepthObserver
 		private void MainWindow_Loaded(object sender, RoutedEventArgs e)
 		{
 			Loaded -= MainWindow_Loaded;
-			//_askScrollViewer = GetScrollViewer(askListView);
-			//_bidScrollViewer = GetScrollViewer(bidListView);
-			//_askScrollViewer.ScrollChanged += (sender1, e1) => _bidScrollViewer.ScrollToVerticalOffset(e1.VerticalOffset);
-			//_bidScrollViewer.ScrollChanged += (sender2, e2) => _askScrollViewer.ScrollToVerticalOffset(e2.VerticalOffset);
 		}
 
 		private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -379,39 +375,12 @@ namespace GridEx.MarketDepthObserver
 			}
 		}
 
-		//private ScrollViewer GetScrollViewer(DependencyObject element)
-		//{
-		//	if (element is ScrollViewer)
-		//	{
-		//		return (ScrollViewer)element;
-		//	}
-
-		//	for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
-		//	{
-		//		var child = VisualTreeHelper.GetChild(element, i);
-
-		//		var result = GetScrollViewer(child);
-		//		if (result == null)
-		//		{
-		//			continue;
-		//		}
-		//		else
-		//		{
-		//			return result;
-		//		}
-		//	}
-
-		//	return null;
-		//}
-
 		private Thread _dataCollectionThread;
 		private Thread _dataThread;
 		private MarketClient marketClient;
 		private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 		private ManualResetEventSlim _enviromentExitWait = new ManualResetEventSlim(true);
 		private ManualResetEventSlim _processesStartedEvent = new ManualResetEventSlim();
-		//private ScrollViewer _askScrollViewer;
-		//private ScrollViewer _bidScrollViewer;
 		private bool _stop;
 		private ushort logHistoryStrings = 50;
 		private ushort logHistoryStringsMaximum = 100;
