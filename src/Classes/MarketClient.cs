@@ -64,14 +64,9 @@ namespace GridEx.MarketDepthObserver.Classes
 					Dispose();
 				}
 			}
-
-			Thread.Sleep(1000);
-
 			Task.Factory.StartNew(
 				() => RunSocket(),
 				TaskCreationOptions.LongRunning);
-
-			_processesStartedEvent.Set();
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -222,6 +217,7 @@ namespace GridEx.MarketDepthObserver.Classes
 
 		void OnConnectedHandler(GridExSocketBase socket)
 		{
+			_processesStartedEvent.Set();
 			OnConnected?.Invoke(this);
 		}
 
