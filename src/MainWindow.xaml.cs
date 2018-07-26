@@ -257,15 +257,15 @@ namespace GridEx.MarketDepthObserver
 					if (client.IsConnected)
 					{
 						client.GetSnapshot(
-							buyArray, 
-							out int buyAmount, 
+							buyArray,
+							out int buyAmount,
 							sellArray,
 							out int sellAmount);
 
 						MarketSnapshotVisual.FillVisualPrices(
-							buyArray, 
-							buyAmount, 
-							sellArray, 
+							buyArray,
+							buyAmount,
+							sellArray,
 							sellAmount,
 							asks,
 							bids);
@@ -372,20 +372,20 @@ namespace GridEx.MarketDepthObserver
 
 		private void DiactivateLoggingToFile()
 		{
-			lock (_fileStreamLocker)
+			var client = _marketClient;
+			if (client != null)
 			{
-				if (_fileStream != null)
-				{
-					_fileStream.Dispose();
-					_fileStream = null;
-				}
-
-				var client = _marketClient;
-				if (client != null)
-				{
-					client.AddMessageToFileLog -= AddMessageToFileLog;
-				}
+				client.AddMessageToFileLog -= AddMessageToFileLog;
 			}
+
+			var fileStream = _fileStream;
+			if (fileStream == null)
+			{
+				return;
+			}
+
+			fileStream.Dispose();
+			_fileStream = null;
 		}
 
 		//private ScrollViewer GetScrollViewer(DependencyObject element)
