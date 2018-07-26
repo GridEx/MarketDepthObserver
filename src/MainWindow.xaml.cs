@@ -156,21 +156,23 @@ namespace GridEx.MarketDepthObserver
 
 		private void AddMessageToFileLog(string message)
 		{
+			var fileStream = _fileStream;
+			if (fileStream == null || !fileStream.CanWrite)
+			{
+				return;
+			}
+
 			lock (_fileStreamLocker)
 			{
-				if (_fileStream != null && _fileStream.CanWrite)
+				var bytes = Encoding.UTF8.GetBytes(message);
+				try
 				{
-					var bytes = Encoding.UTF8.GetBytes(message);
-					try
-					{
-						_fileStream.Write(bytes, 0, bytes.Length);
-					}
-					catch(Exception ex)
-					{
-						AddMessageToLog(ex.Message);
-						DiactivateLoggingToFile();
-					}
-
+					fileStream.Write(bytes, 0, bytes.Length);
+				}
+				catch (Exception ex)
+				{
+					AddMessageToLog(ex.Message);
+					DiactivateLoggingToFile();
 				}
 			}
 		}
@@ -186,13 +188,14 @@ namespace GridEx.MarketDepthObserver
 
 			DiactivateLoggingToFile();
 
-			if (marketClient != null)
+			var client = _marketClient;
+			if (client != null)
 			{
-				marketClient.OnConnected -= OnConnected;
-				marketClient.OnDisconnected -= OnDisconnected;
-				marketClient.OnError -= OnError;
-				marketClient.OnException -= OnException;
-				marketClient.Dispose();
+				client.OnConnected -= OnConnected;
+				client.OnDisconnected -= OnDisconnected;
+				client.OnError -= OnError;
+				client.OnException -= OnException;
+				client.Dispose();
 			}
 		}
 
@@ -206,7 +209,13 @@ namespace GridEx.MarketDepthObserver
 			var pauseEvent = new ManualResetEventSlim();
 			pauseEvent.Wait(5000);
 
-			if (marketClient != null && !marketClient.IsConnected)
+			var client = _marketClient;
+			if (client == null)
+			{
+				return;
+			}
+
+			if (!client.IsConnected)
 			{
 				Dispatcher.Invoke(new Action(() =>
 				{
@@ -237,7 +246,6 @@ namespace GridEx.MarketDepthObserver
 
 				pauseEvent.Reset();
 				int elapsedMiliseconds = 0;
-				MarketClient client = null;
 				var buyArray = new PriceVolumePair[MarketSnapshot.Depth];
 				var sellArray = new PriceVolumePair[MarketSnapshot.Depth];
 
@@ -246,8 +254,7 @@ namespace GridEx.MarketDepthObserver
 
 				while (!_stop)
 				{
-					client = marketClient;
-					if (client != null && client.IsConnected)
+					if (client.IsConnected)
 					{
 						client.GetSnapshot(
 							buyArray, 
@@ -290,7 +297,6 @@ namespace GridEx.MarketDepthObserver
 
 				StopClient();
 			}
-			GC.Collect(2, GCCollectionMode.Forced);
 		}
 
 		private void CreateDataCollectionThread()
@@ -318,19 +324,20 @@ namespace GridEx.MarketDepthObserver
 			_cancellationTokenSource = new CancellationTokenSource();
 			_processesStartedEvent = new ManualResetEventSlim();
 
-			marketClient = new MarketClient(_enviromentExitWait, _processesStartedEvent);
+			var newClient = new MarketClient(_enviromentExitWait, _processesStartedEvent);
+			_marketClient = newClient;
 
-			marketClient.OnConnected += OnConnected;
-			marketClient.OnDisconnected += OnDisconnected;
-			marketClient.OnError += OnError;
-			marketClient.OnException += OnException;
+			newClient.OnConnected += OnConnected;
+			newClient.OnDisconnected += OnDisconnected;
+			newClient.OnError += OnError;
+			newClient.OnException += OnException;
 
 			if (LogToFile)
 			{
 				ActivateLoggingToFile();
 			}
 
-			marketClient.Run(App.ConnectionConfig.IP.MapToIPv4(), App.ConnectionConfig.Port, ref _cancellationTokenSource, ref _enviromentExitWait);
+			newClient.Run(App.ConnectionConfig.IP.MapToIPv4(), App.ConnectionConfig.Port, ref _cancellationTokenSource, ref _enviromentExitWait);
 		}
 
 		private void Window_Closed(object sender, EventArgs e)
@@ -338,7 +345,7 @@ namespace GridEx.MarketDepthObserver
 			FinishWatchMarket();
 			_enviromentExitWait.Wait(5000);
 
-			if (!_enviromentExitWait.IsSet && marketClient != null)
+			if (!_enviromentExitWait.IsSet && _marketClient != null)
 				StopClient();
 
 			App.ConnectionConfig.Save();
@@ -346,7 +353,8 @@ namespace GridEx.MarketDepthObserver
 
 		private void ActivateLoggingToFile()
 		{
-			if (marketClient != null)
+			var client = _marketClient;
+			if (client != null)
 			{
 				if (_fileStream == null)
 				{
@@ -358,7 +366,7 @@ namespace GridEx.MarketDepthObserver
 					_fileStream = File.Open($"{directory}\\{DateTime.Now.ToString("dd-MM-yyy hh-mm-ss.fff")}.log.txt", FileMode.Create);
 				}
 
-				marketClient.AddMessageToFileLog += AddMessageToFileLog;
+				client.AddMessageToFileLog += AddMessageToFileLog;
 			}
 		}
 
@@ -372,9 +380,10 @@ namespace GridEx.MarketDepthObserver
 					_fileStream = null;
 				}
 
-				if (marketClient != null)
+				var client = _marketClient;
+				if (client != null)
 				{
-					marketClient.AddMessageToFileLog -= AddMessageToFileLog;
+					client.AddMessageToFileLog -= AddMessageToFileLog;
 				}
 			}
 		}
@@ -406,7 +415,7 @@ namespace GridEx.MarketDepthObserver
 
 		private Thread _dataCollectionThread;
 		private Thread _dataThread;
-		private MarketClient marketClient;
+		private MarketClient _marketClient;
 		private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 		private ManualResetEventSlim _enviromentExitWait = new ManualResetEventSlim(true);
 		private ManualResetEventSlim _processesStartedEvent = new ManualResetEventSlim();
