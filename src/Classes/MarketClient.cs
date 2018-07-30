@@ -26,7 +26,14 @@ namespace GridEx.MarketDepthObserver.Classes
 			_marketSnapshotBuilder = new MarketSnapshotBuilder();
 		}
 
-		public bool IsConnected { get => _marketStreamSocket != null && _marketStreamSocket.IsConnected; }
+		public bool IsConnected
+		{
+			get
+			{
+				var socket = _marketStreamSocket;
+				return socket != null && socket.IsConnected;
+			}
+		}
 			
 		public void Run(IPAddress serverAddress, int serverPort, 
 			ref CancellationTokenSource cancellationTokenSource,
@@ -36,26 +43,27 @@ namespace GridEx.MarketDepthObserver.Classes
 			_cancellationTokenSource = cancellationTokenSource;
 			_marketSnapshotBuilder = new MarketSnapshotBuilder();
 
-			_marketStreamSocket = new MarketStreamSocket();
-			_marketStreamSocket.OnError += OnErrorHandler;
-			_marketStreamSocket.OnDisconnected += OnDisconnectedHandler;
-			_marketStreamSocket.OnConnected += OnConnectedHandler;
-			_marketStreamSocket.OnException += OnExceptionHandler;
-			_marketStreamSocket.OnMarketChange += OnMarketChangeHandler;
-			_marketStreamSocket.OnMarketSnapshot += OnMarketSnapshotHandler;
+			var socket = new MarketStreamSocket();
+			_marketStreamSocket = socket;
+			socket.OnError += OnErrorHandler;
+			socket.OnDisconnected += OnDisconnectedHandler;
+			socket.OnConnected += OnConnectedHandler;
+			socket.OnException += OnExceptionHandler;
+			socket.OnMarketChange += OnMarketChangeHandler;
+			socket.OnMarketSnapshot += OnMarketSnapshotHandler;
 
 			void RunSocket()
 			{
 				try
 				{
-					_marketStreamSocket.Connect(new IPEndPoint(serverAddress.MapToIPv4(), serverPort));
-					_marketStreamSocket.WaitResponses(_cancellationTokenSource.Token);
+					socket.Connect(new IPEndPoint(serverAddress.MapToIPv4(), serverPort));
+					socket.WaitResponses(_cancellationTokenSource.Token);
 				}
 				catch
 				{
 					try
 					{
-						_marketStreamSocket.Dispose();
+						socket.Dispose();
 					}
 					catch { }
 				}
@@ -82,17 +90,18 @@ namespace GridEx.MarketDepthObserver.Classes
 				_cancellationTokenSource.Cancel();
 			}
 
-			if (_marketStreamSocket != null)
+			var socket = _marketStreamSocket;
+			if (socket != null)
 			{
 				try
 				{
-					_marketStreamSocket.OnError -= OnErrorHandler;
-					_marketStreamSocket.OnDisconnected -= OnDisconnectedHandler;
-					_marketStreamSocket.OnConnected -= OnConnectedHandler;
-					_marketStreamSocket.OnException -= OnExceptionHandler;
-					_marketStreamSocket.OnMarketChange -= OnMarketChangeHandler;
-					_marketStreamSocket.OnMarketSnapshot -= OnMarketSnapshotHandler;
-					_marketStreamSocket.Dispose();
+					socket.OnError -= OnErrorHandler;
+					socket.OnDisconnected -= OnDisconnectedHandler;
+					socket.OnConnected -= OnConnectedHandler;
+					socket.OnException -= OnExceptionHandler;
+					socket.OnMarketChange -= OnMarketChangeHandler;
+					socket.OnMarketSnapshot -= OnMarketSnapshotHandler;
+					socket.Dispose();
 				}
 				catch
 				{
@@ -199,7 +208,12 @@ namespace GridEx.MarketDepthObserver.Classes
 
 		void OnExceptionHandler(GridExSocketBase socket, Exception exception)
 		{
-			_marketStreamSocket.OnException -= OnExceptionHandler;
+			var s = _marketStreamSocket;
+			if (s != null)
+			{
+				s.OnException -= OnExceptionHandler;
+			}
+
 			Disconnect();
 			OnException?.Invoke(this, exception);
 		}
