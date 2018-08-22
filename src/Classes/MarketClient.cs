@@ -146,7 +146,7 @@ namespace GridEx.MarketDepthObserver.Classes
 					case MarketChangeTypeCode.AskByAddedOrder:
 						marketChangeType = "AA";
 						break;
-					case MarketChangeTypeCode.AskByCancelledOrder:
+					case MarketChangeTypeCode.AskByCanceledOrder:
 						marketChangeType = "AC";
 						break;
 					case MarketChangeTypeCode.AskByExecutedOrder:
@@ -155,7 +155,7 @@ namespace GridEx.MarketDepthObserver.Classes
 					case MarketChangeTypeCode.BidByAddedOrder:
 						marketChangeType = "BA";
 						break;
-					case MarketChangeTypeCode.BidByCancelledOrder:
+					case MarketChangeTypeCode.BidByCanceledOrder:
 						marketChangeType = "BC";
 						break;
 					case MarketChangeTypeCode.BidByExecutedOrder:
@@ -164,7 +164,7 @@ namespace GridEx.MarketDepthObserver.Classes
 					case MarketChangeTypeCode.BuyVolumeByAddedOrder:
 						marketChangeType = "VABuy";
 						break;
-					case MarketChangeTypeCode.BuyVolumeByCancelledOrder:
+					case MarketChangeTypeCode.BuyVolumeByCanceledOrder:
 						marketChangeType = "VCB";
 						break;
 					case MarketChangeTypeCode.BidVolumeByExecutedOrder:
@@ -176,7 +176,7 @@ namespace GridEx.MarketDepthObserver.Classes
 					case MarketChangeTypeCode.SellVolumeByAddedOrder:
 						marketChangeType = "VAS";
 						break;
-					case MarketChangeTypeCode.SellVolumeByCancelledOrder:
+					case MarketChangeTypeCode.SellVolumeByCanceledOrder:
 						marketChangeType = "VCS";
 						break;
 					case MarketChangeTypeCode.AskVolumeByExecutedOrder:

@@ -25,7 +25,7 @@ namespace GridEx.MarketDepthObserver.Classes
 				{
 					case MarketChangeTypeCode.BidByAddedOrder:
 					case MarketChangeTypeCode.BidByExecutedOrder:
-					case MarketChangeTypeCode.BidByCancelledOrder:
+					case MarketChangeTypeCode.BidByCanceledOrder:
 						Debug.Assert(change.Volume != 0, $"Price={change.Price} Volume={change.Volume} Type={change.MarketChangeType.ToString()}");
 						if (!_buys.Add(volume))
 						{
@@ -35,7 +35,7 @@ namespace GridEx.MarketDepthObserver.Classes
 						break;                                           
 					case MarketChangeTypeCode.AskByAddedOrder:
 					case MarketChangeTypeCode.AskByExecutedOrder:
-					case MarketChangeTypeCode.AskByCancelledOrder:
+					case MarketChangeTypeCode.AskByCanceledOrder:
 						Debug.Assert(change.Volume != 0, $"Price={change.Price} Volume={change.Volume} Type={change.MarketChangeType.ToString()}");
 						if (!_sells.Add(volume))
 						{
@@ -45,7 +45,7 @@ namespace GridEx.MarketDepthObserver.Classes
 						break;
 					case MarketChangeTypeCode.BuyVolumeByAddedOrder:
 					case MarketChangeTypeCode.BidVolumeByExecutedOrder:
-					case MarketChangeTypeCode.BuyVolumeByCancelledOrder:
+					case MarketChangeTypeCode.BuyVolumeByCanceledOrder:
 						if (change.Volume == 0)
 						{
 							_buys.Remove(volume);
@@ -61,7 +61,7 @@ namespace GridEx.MarketDepthObserver.Classes
 						break;
 					case MarketChangeTypeCode.SellVolumeByAddedOrder:
 					case MarketChangeTypeCode.AskVolumeByExecutedOrder:
-					case MarketChangeTypeCode.SellVolumeByCancelledOrder:
+					case MarketChangeTypeCode.SellVolumeByCanceledOrder:
 						if (change.Volume == 0)
 						{
 							_sells.Remove(volume);
