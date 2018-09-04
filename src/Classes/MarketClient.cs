@@ -190,7 +190,7 @@ namespace GridEx.MarketDepthObserver.Classes
 			}
 		}
 
-		private unsafe void OnMarketSnapshotHandler(MarketStreamSocket marketStreamSocket, MarketSnapshot marketSnapshot)
+		private unsafe void OnMarketSnapshotHandler(MarketStreamSocket marketStreamSocket, ref MarketSnapshot marketSnapshot)
 		{
 			_marketSnapshotBuilder.ReBuild(ref marketSnapshot);
 			if (AddMessageToFileLog != null)
