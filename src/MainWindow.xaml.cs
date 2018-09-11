@@ -231,34 +231,34 @@ namespace GridEx.MarketDepthObserver
 				var pauseEvent = new ManualResetEventSlim();
 
 				int elapsedMiliseconds = 0;
-				var buyArray = new PriceVolumePair[MarketSnapshot.Depth];
-				var sellArray = new PriceVolumePair[MarketSnapshot.Depth];
+				var bidArray = new PriceVolumePair[MarketSnapshot.MaxDepth];
+				var askArray = new PriceVolumePair[MarketSnapshot.MaxDepth];
 
-				var asks = new MarketValueVisual[MarketSnapshot.Depth];
-				var bids = new MarketValueVisual[MarketSnapshot.Depth];
+				var asks = new MarketValueVisual[MarketSnapshot.MaxDepth];
+				var bids = new MarketValueVisual[MarketSnapshot.MaxDepth];
 
 				while (!_stop)
 				{
 					if (marketClient.IsConnected)
 					{
 						marketClient.GetSnapshot(
-							buyArray, 
-							out int buyAmount, 
-							sellArray,
-							out int sellAmount);
+							bidArray, 
+							out int bidQuantity, 
+							askArray,
+							out int askQuantity);
 
 						MarketSnapshotVisual.FillVisualPrices(
-							buyArray, 
-							buyAmount, 
-							sellArray, 
-							sellAmount,
+							bidArray, 
+							bidQuantity, 
+							askArray, 
+							askQuantity,
 							asks,
 							bids);
 
 						Dispatcher.BeginInvoke(new Action(() =>
 						{
-							bidListView.ItemsSource = bids.Take(buyAmount);
-							askListView.ItemsSource = asks.Take(sellAmount);
+							bidListView.ItemsSource = bids.Take(bidQuantity);
+							askListView.ItemsSource = asks.Take(askQuantity);
 
 #if DEBUG
 							if (buyAmount > 0 && sellAmount > 0)

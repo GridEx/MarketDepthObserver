@@ -196,10 +196,10 @@ namespace GridEx.MarketDepthObserver.Classes
 			if (AddMessageToFileLog != null)
 			{
 				StringBuilder log = new StringBuilder($"----- IN  MS - {DateTime.Now.ToString("hh:mm:ss.fff")}{Environment.NewLine}");
-				for (int i = 0; i < MarketSnapshot.Depth; i++)
+				for (int i = 0; i < MarketSnapshot.MaxDepth; i++)
 				{
-					log.AppendLine($"     BP={marketSnapshot.BuyPrices[i].ToString("F11")} BV={marketSnapshot.BuyVolumes[i].ToString("F11")}");
-					log.AppendLine($"     SP={marketSnapshot.SellPrices[i].ToString("F11")} SV={marketSnapshot.SellPrices[i].ToString("F11")}{Environment.NewLine}");
+					log.AppendLine($"     BP={marketSnapshot.BidPrices[i].ToString("F11")} BV={marketSnapshot.BidVolumes[i].ToString("F11")}");
+					log.AppendLine($"     SP={marketSnapshot.AskPrices[i].ToString("F11")} SV={marketSnapshot.AskVolumes[i].ToString("F11")}{Environment.NewLine}");
 				}
 				log.AppendLine($"----- OUT  MS");
 				AddMessageToFileLog?.Invoke(log.ToString());
