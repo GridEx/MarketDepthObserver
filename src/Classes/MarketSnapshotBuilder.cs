@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using GridEx.API.MarketStream;
+using GridEx.API.MarketDepth.Responses;
 
 namespace GridEx.MarketDepthObserver.Classes
 {
