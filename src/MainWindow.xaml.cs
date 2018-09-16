@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
-using GridEx.API.MarketStream;
+using GridEx.API.MarketDepth.Responses;
 using GridEx.MarketDepthObserver.Classes;
 using GridEx.MarketDepthObserver.Config;
 using MarketDepthClient.Classes;

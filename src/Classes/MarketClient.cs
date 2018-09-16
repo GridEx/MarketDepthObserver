@@ -7,7 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using GridEx.API;
-using GridEx.API.MarketStream;
+using GridEx.API.MarketDepth;
+using GridEx.API.MarketDepth.Responses;
 
 namespace GridEx.MarketDepthObserver.Classes
 {
@@ -30,7 +31,7 @@ namespace GridEx.MarketDepthObserver.Classes
 		{
 			get
 			{
-				var socket = _marketStreamSocket;
+				var socket = _marketDepthSocket;
 				return socket != null && socket.IsConnected;
 			}
 		}
@@ -43,8 +44,8 @@ namespace GridEx.MarketDepthObserver.Classes
 			_cancellationTokenSource = cancellationTokenSource;
 			_marketSnapshotBuilder = new MarketSnapshotBuilder();
 
-			var socket = new MarketStreamSocket();
-			_marketStreamSocket = socket;
+			var socket = new MarketDepthSocket();
+			_marketDepthSocket = socket;
 			socket.OnError += OnErrorHandler;
 			socket.OnDisconnected += OnDisconnectedHandler;
 			socket.OnConnected += OnConnectedHandler;
@@ -90,7 +91,7 @@ namespace GridEx.MarketDepthObserver.Classes
 				_cancellationTokenSource.Cancel();
 			}
 
-			var socket = _marketStreamSocket;
+			var socket = _marketDepthSocket;
 			if (socket != null)
 			{
 				try
@@ -109,7 +110,7 @@ namespace GridEx.MarketDepthObserver.Classes
 				}
 				finally
 				{
-					_marketStreamSocket = null;
+					_marketDepthSocket = null;
 				}
 			}
 
@@ -133,7 +134,7 @@ namespace GridEx.MarketDepthObserver.Classes
 			return Interlocked.Exchange(ref _countOfDimensions, 0);
 		}
 
-		private void OnMarketChangeHandler(MarketStreamSocket marketStreamSocket, MarketChange marketChange)
+		private void OnMarketChangeHandler(MarketDepthSocket marketDepthSocket, MarketChange marketChange)
 		{
 			_marketSnapshotBuilder.Build(ref marketChange);
 			Interlocked.Increment(ref _countOfDimensions);
@@ -190,7 +191,7 @@ namespace GridEx.MarketDepthObserver.Classes
 			}
 		}
 
-		private unsafe void OnMarketSnapshotHandler(MarketStreamSocket marketStreamSocket, ref MarketSnapshot marketSnapshot)
+		private unsafe void OnMarketSnapshotHandler(MarketDepthSocket socket, ref MarketSnapshot marketSnapshot)
 		{
 			_marketSnapshotBuilder.ReBuild(ref marketSnapshot);
 			if (AddMessageToFileLog != null)
@@ -208,7 +209,7 @@ namespace GridEx.MarketDepthObserver.Classes
 
 		void OnExceptionHandler(GridExSocketBase socket, Exception exception)
 		{
-			var s = _marketStreamSocket;
+			var s = _marketDepthSocket;
 			if (s != null)
 			{
 				s.OnException -= OnExceptionHandler;
@@ -235,7 +236,7 @@ namespace GridEx.MarketDepthObserver.Classes
 			OnConnected?.Invoke(this);
 		}
 
-		private MarketStreamSocket _marketStreamSocket;
+		private MarketDepthSocket _marketDepthSocket;
 		private MarketSnapshotBuilder _marketSnapshotBuilder;
 
 		private ManualResetEventSlim _enviromentExitWait;

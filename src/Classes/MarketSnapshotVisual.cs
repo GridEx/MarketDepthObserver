@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using GridEx.API.MarketStream;
 
 namespace GridEx.MarketDepthObserver.Classes
 {
