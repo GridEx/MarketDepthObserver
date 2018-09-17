@@ -231,11 +231,11 @@ namespace GridEx.MarketDepthObserver
 				var pauseEvent = new ManualResetEventSlim();
 
 				int elapsedMiliseconds = 0;
-				var bidArray = new PriceVolumePair[MarketSnapshot.MaxDepth];
-				var askArray = new PriceVolumePair[MarketSnapshot.MaxDepth];
+				var bidArray = new PriceVolumePair[MarketSnapshotLevel3.MaxDepth];
+				var askArray = new PriceVolumePair[MarketSnapshotLevel3.MaxDepth];
 
-				var asks = new MarketValueVisual[MarketSnapshot.MaxDepth];
-				var bids = new MarketValueVisual[MarketSnapshot.MaxDepth];
+				var asks = new MarketValueVisual[MarketSnapshotLevel3.MaxDepth];
+				var bids = new MarketValueVisual[MarketSnapshotLevel3.MaxDepth];
 
 				while (!_stop)
 				{
