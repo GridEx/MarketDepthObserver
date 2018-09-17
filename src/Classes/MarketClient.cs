@@ -51,7 +51,7 @@ namespace GridEx.MarketDepthObserver.Classes
 			socket.OnConnected += OnConnectedHandler;
 			socket.OnException += OnExceptionHandler;
 			socket.OnMarketChange += OnMarketChangeHandler;
-			socket.OnMarketSnapshot += OnMarketSnapshotHandler;
+			socket.OnMarketSnapshotLevel3 += OnMarketSnapshotHandler;
 
 			void RunSocket()
 			{
@@ -101,7 +101,7 @@ namespace GridEx.MarketDepthObserver.Classes
 					socket.OnConnected -= OnConnectedHandler;
 					socket.OnException -= OnExceptionHandler;
 					socket.OnMarketChange -= OnMarketChangeHandler;
-					socket.OnMarketSnapshot -= OnMarketSnapshotHandler;
+					socket.OnMarketSnapshotLevel3 -= OnMarketSnapshotHandler;
 					socket.Dispose();
 				}
 				catch
@@ -144,46 +144,50 @@ namespace GridEx.MarketDepthObserver.Classes
 				string marketChangeType = "??";
 				switch (marketChange.MarketChangeType)
 				{
-					case MarketChangeTypeCode.AskByAddedOrder:
+					case MarketChangeTypeCode.AskPriceByAddedOrder:
 						marketChangeType = "AA";
 						break;
-					case MarketChangeTypeCode.AskByCanceledOrder:
+					case MarketChangeTypeCode.AskPriceByCanceledOrder:
 						marketChangeType = "AC";
 						break;
-					case MarketChangeTypeCode.AskByExecutedOrder:
+					case MarketChangeTypeCode.AskPriceByExecutedOrder:
 						marketChangeType = "AE";
 						break;
-					case MarketChangeTypeCode.BidByAddedOrder:
+					case MarketChangeTypeCode.BidPriceByAddedOrder:
 						marketChangeType = "BA";
 						break;
-					case MarketChangeTypeCode.BidByCanceledOrder:
+					case MarketChangeTypeCode.BidPriceByCanceledOrder:
 						marketChangeType = "BC";
 						break;
-					case MarketChangeTypeCode.BidByExecutedOrder:
+					case MarketChangeTypeCode.BidPriceByExecutedOrder:
 						marketChangeType = "BE";
 						break;
-					case MarketChangeTypeCode.BuyVolumeByAddedOrder:
+					case MarketChangeTypeCode.BidVolumeByAddedOrder:
+					case MarketChangeTypeCode.BuyingVolumeByAddedOrder:
 						marketChangeType = "VABuy";
 						break;
-					case MarketChangeTypeCode.BuyVolumeByCanceledOrder:
+					case MarketChangeTypeCode.BidVolumeByCanceledOrder:
+					case MarketChangeTypeCode.BuyingVolumeByCanceledOrder:
 						marketChangeType = "VCB";
 						break;
 					case MarketChangeTypeCode.BidVolumeByExecutedOrder:
 						marketChangeType = "VEB";
 						break;
-					case MarketChangeTypeCode.BuyVolumeInfoAdded:
+					case MarketChangeTypeCode.BuyingVolumeInfoAdded:
 						marketChangeType = "IVB";
 						break;
-					case MarketChangeTypeCode.SellVolumeByAddedOrder:
+					case MarketChangeTypeCode.AskVolumeByAddedOrder:
+					case MarketChangeTypeCode.SellingVolumeByAddedOrder:
 						marketChangeType = "VAS";
 						break;
-					case MarketChangeTypeCode.SellVolumeByCanceledOrder:
+					case MarketChangeTypeCode.AskVolumeByCanceledOrder:
+					case MarketChangeTypeCode.SellingVolumeByCanceledOrder:
 						marketChangeType = "VCS";
 						break;
 					case MarketChangeTypeCode.AskVolumeByExecutedOrder:
 						marketChangeType = "VEA";
 						break;
-					case MarketChangeTypeCode.SellVolumeInfoAdded:
+					case MarketChangeTypeCode.SellingVolumeInfoAdded:
 						marketChangeType = "IVS";
 						break;
 				}
@@ -191,13 +195,13 @@ namespace GridEx.MarketDepthObserver.Classes
 			}
 		}
 
-		private unsafe void OnMarketSnapshotHandler(MarketDepthSocket socket, ref MarketSnapshot marketSnapshot)
+		private unsafe void OnMarketSnapshotHandler(MarketDepthSocket socket, ref MarketSnapshotLevel3 marketSnapshot)
 		{
 			_marketSnapshotBuilder.ReBuild(ref marketSnapshot);
 			if (AddMessageToFileLog != null)
 			{
 				StringBuilder log = new StringBuilder($"----- IN  MS - {DateTime.Now.ToString("hh:mm:ss.fff")}{Environment.NewLine}");
-				for (int i = 0; i < MarketSnapshot.MaxDepth; i++)
+				for (int i = 0; i < MarketSnapshotLevel3.MaxDepth; i++)
 				{
 					log.AppendLine($"     BP={marketSnapshot.BidPrices[i].ToString("F11")} BV={marketSnapshot.BidVolumes[i].ToString("F11")}");
 					log.AppendLine($"     SP={marketSnapshot.AskPrices[i].ToString("F11")} SV={marketSnapshot.AskVolumes[i].ToString("F11")}{Environment.NewLine}");
